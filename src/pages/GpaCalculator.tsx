@@ -41,9 +41,15 @@ const GpaCalculator = () => {
     setCourses([...courses, { name: '', credits: 3, grade: 'A' }]);
   };
 
-  const updateCourse = (index: number, field: keyof Course, value: any) => {
+  const updateCourse = (index: number, field: keyof Course, value: string | number) => {
     const updatedCourses = [...courses];
-    updatedCourses[index][field] = value;
+    if (field === 'name') {
+      updatedCourses[index][field] = value as string;
+    } else if (field === 'credits') {
+      updatedCourses[index][field] = value as number;
+    } else if (field === 'grade') {
+      updatedCourses[index][field] = value as string;
+    }
     setCourses(updatedCourses);
   };
 
@@ -88,11 +94,11 @@ const GpaCalculator = () => {
               </Link>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center">
                 <GraduationCap className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-600 bg-clip-text text-transparent">
                   GPA Calculator
                 </h1>
                 <p className="text-sm text-gray-600">Calculate semester and cumulative GPA</p>
