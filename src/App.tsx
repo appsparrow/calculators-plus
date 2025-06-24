@@ -11,6 +11,9 @@ import CreditCardCalculator from "./pages/CreditCardCalculator";
 import CalorieCalculator from "./pages/CalorieCalculator";
 import DebtPayoffCalculator from "./pages/DebtPayoffCalculator";
 import GpaCalculator from "./pages/GpaCalculator";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +32,9 @@ const App = () => (
           <Route path="/calorie" element={<CalorieCalculator />} />
           <Route path="/debt-payoff" element={<DebtPayoffCalculator />} />
           <Route path="/gpa" element={<GpaCalculator />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

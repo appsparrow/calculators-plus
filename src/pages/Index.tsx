@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Calculator, Home, Car, CreditCard, BarChart3, Flame, GraduationCap, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -290,10 +291,9 @@ const Index = () => {
               Making complex calculations simple and shareable
             </p>
             <div className="flex justify-center space-x-6 text-sm text-gray-500">
-              <a href="#" className="hover:text-gray-700 transition-colors">Privacy</a>
-              <a href="#" className="hover:text-gray-700 transition-colors">Terms</a>
-              <a href="#" className="hover:text-gray-700 transition-colors">Contact</a>
-              <a href="#" className="hover:text-gray-700 transition-colors">About</a>
+              <Link to="/privacy" className="hover:text-gray-700 transition-colors">Privacy</Link>
+              <Link to="/terms" className="hover:text-gray-700 transition-colors">Terms</Link>
+              <Link to="/about" className="hover:text-gray-700 transition-colors">About</Link>
             </div>
           </div>
         </div>

@@ -1,113 +1,77 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Car, ArrowLeft } from 'lucide-react';
+import { Car, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-interface LoanOption {
-  vehiclePrice: number;
-  downPayment: number;
+interface LoanComparison {
+  loanAmount: number;
   interestRate: number;
   loanTerm: number;
-}
-
-interface LoanResults {
-  loanAmount: number;
   monthlyPayment: number;
-  totalInterest: number;
-  totalPayment: number;
+  totalCost: number;
 }
 
 const AutoLoanCalculator = () => {
-  const [option1, setOption1] = useState<LoanOption>({
-    vehiclePrice: 41000,
-    downPayment: 5000,
-    interestRate: 0,
-    loanTerm: 5
-  });
+  const [loanAmount1, setLoanAmount1] = useState(25000);
+  const [interestRate1, setInterestRate1] = useState(6.5);
+  const [loanTerm1, setLoanTerm1] = useState(60);
+  const [loanAmount2, setLoanAmount2] = useState(30000);
+  const [interestRate2, setInterestRate2] = useState(7.0);
+  const [loanTerm2, setLoanTerm2] = useState(72);
+  const [comparisonResults, setComparisonResults] = useState<LoanComparison[]>([
+    {
+      loanAmount: 0,
+      interestRate: 0,
+      loanTerm: 0,
+      monthlyPayment: 0,
+      totalCost: 0,
+    },
+    {
+      loanAmount: 0,
+      interestRate: 0,
+      loanTerm: 0,
+      monthlyPayment: 0,
+      totalCost: 0,
+    },
+  ]);
 
-  const [option2, setOption2] = useState<LoanOption>({
-    vehiclePrice: 41000,
-    downPayment: 5000,
-    interestRate: 5.7,
-    loanTerm: 5
-  });
-
-  const [results1, setResults1] = useState<LoanResults>({
-    loanAmount: 0,
-    monthlyPayment: 0,
-    totalInterest: 0,
-    totalPayment: 0
-  });
-
-  const [results2, setResults2] = useState<LoanResults>({
-    loanAmount: 0,
-    monthlyPayment: 0,
-    totalInterest: 0,
-    totalPayment: 0
-  });
-
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-
-  const validateInputs = (option: LoanOption, prefix: string) => {
-    const newErrors: {[key: string]: string} = {};
-    
-    if (option.vehiclePrice <= 0) newErrors[`${prefix}VehiclePrice`] = "Vehicle price must be positive";
-    if (option.downPayment < 0) newErrors[`${prefix}DownPayment`] = "Down payment cannot be negative";
-    if (option.downPayment > option.vehiclePrice) newErrors[`${prefix}DownPayment`] = "Down payment cannot exceed vehicle price";
-    if (option.interestRate < 0) newErrors[`${prefix}InterestRate`] = "Interest rate cannot be negative";
-    if (option.loanTerm <= 0) newErrors[`${prefix}LoanTerm`] = "Loan term must be positive";
-
-    return newErrors;
-  };
-
-  const calculateLoan = (option: LoanOption): LoanResults => {
-    const loanAmount = option.vehiclePrice - option.downPayment;
-    const monthlyRate = option.interestRate / 100 / 12;
-    const numPayments = option.loanTerm * 12;
-
-    let monthlyPayment = 0;
-    if (option.interestRate === 0) {
-      monthlyPayment = loanAmount / numPayments;
-    } else {
-      monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
-                      (Math.pow(1 + monthlyRate, numPayments) - 1);
-    }
-
-    const totalPayment = monthlyPayment * numPayments;
-    const totalInterest = totalPayment - loanAmount;
+  const calculateLoan = (loanAmount: number, interestRate: number, loanTerm: number) => {
+    const monthlyInterestRate = interestRate / 100 / 12;
+    const numberOfPayments = loanTerm;
+    const monthlyPayment =
+      (loanAmount * monthlyInterestRate) /
+      (1 - Math.pow(1 + monthlyInterestRate, -numberOfPayments));
+    const totalCost = monthlyPayment * numberOfPayments;
 
     return {
-      loanAmount,
-      monthlyPayment,
-      totalInterest,
-      totalPayment: totalPayment
+      monthlyPayment: monthlyPayment || 0,
+      totalCost: totalCost || 0,
     };
   };
 
-  const updateCalculations = () => {
-    const errors1 = validateInputs(option1, 'option1');
-    const errors2 = validateInputs(option2, 'option2');
-    const allErrors = { ...errors1, ...errors2 };
-    
-    setErrors(allErrors);
-
-    if (Object.keys(allErrors).length === 0) {
-      setResults1(calculateLoan(option1));
-      setResults2(calculateLoan(option2));
-    }
-  };
-
   useEffect(() => {
-    updateCalculations();
-  }, [option1, option2]);
+    const loan1 = calculateLoan(loanAmount1, interestRate1, loanTerm1);
+    const loan2 = calculateLoan(loanAmount2, interestRate2, loanTerm2);
 
-  const savings = results2.totalPayment - results1.totalPayment;
-  const betterOption = savings > 0 ? 1 : 2;
-  const savingsAmount = Math.abs(savings);
+    setComparisonResults([
+      {
+        loanAmount: loanAmount1,
+        interestRate: interestRate1,
+        loanTerm: loanTerm1,
+        monthlyPayment: loan1.monthlyPayment,
+        totalCost: loan1.totalCost,
+      },
+      {
+        loanAmount: loanAmount2,
+        interestRate: interestRate2,
+        loanTerm: loanTerm2,
+        monthlyPayment: loan2.monthlyPayment,
+        totalCost: loan2.totalCost,
+      },
+    ]);
+  }, [loanAmount1, interestRate1, loanTerm1, loanAmount2, interestRate2, loanTerm2]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-sky-50 to-pink-50">
@@ -116,8 +80,7 @@ const AutoLoanCalculator = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                <ArrowLeft className="w-5 h-5" />
-                <span>Back to Calculators</span>
+                <ChevronLeft className="w-5 h-5" />
               </Link>
             </div>
             <div className="flex items-center space-x-3">
@@ -126,9 +89,9 @@ const AutoLoanCalculator = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
-                  Auto Loan Comparison
+                  Auto Loan Calculator
                 </h1>
-                <p className="text-sm text-gray-600">Compare two loan options side-by-side</p>
+                <p className="text-sm text-gray-600">Compare car loan options</p>
               </div>
             </div>
           </div>
@@ -136,162 +99,159 @@ const AutoLoanCalculator = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Loan Option 1 */}
-          <Card className="bg-white/60 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-sky-600">Loan Option 1</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Vehicle Price ($)</label>
-                <Input
-                  type="number"
-                  value={option1.vehiclePrice}
-                  onChange={(e) => setOption1(prev => ({ ...prev, vehiclePrice: Number(e.target.value) }))}
-                  className={errors.option1VehiclePrice ? 'border-red-500' : ''}
-                />
-                {errors.option1VehiclePrice && <p className="text-red-500 text-xs mt-1">{errors.option1VehiclePrice}</p>}
+        <div className="flex gap-8">
+          {/* Left Sidebar Ad */}
+          <aside className="hidden lg:block w-40 flex-shrink-0">
+            <div className="sticky top-24">
+              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-xs font-medium mb-1">Advertisement</div>
+                  <div className="text-xs">160 x 600</div>
+                </div>
               </div>
+            </div>
+          </aside>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Down Payment ($)</label>
-                <Input
-                  type="number"
-                  value={option1.downPayment}
-                  onChange={(e) => setOption1(prev => ({ ...prev, downPayment: Number(e.target.value) }))}
-                  className={errors.option1DownPayment ? 'border-red-500' : ''}
-                />
-                {errors.option1DownPayment && <p className="text-red-500 text-xs mt-1">{errors.option1DownPayment}</p>}
-              </div>
+          {/* Main Content */}
+          <div className="flex-1 space-y-8">
+            {/* Input Panels */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="bg-white/60 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Loan Option 1</CardTitle>
+                  <CardDescription>Enter details for the first loan option</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Loan Amount</label>
+                    <Input
+                      type="number"
+                      value={loanAmount1}
+                      onChange={(e) => setLoanAmount1(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
+                    <Input
+                      type="number"
+                      value={interestRate1}
+                      onChange={(e) => setInterestRate1(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Loan Term (months)</label>
+                    <Input
+                      type="number"
+                      value={loanTerm1}
+                      onChange={(e) => setLoanTerm1(Number(e.target.value))}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={option1.interestRate}
-                  onChange={(e) => setOption1(prev => ({ ...prev, interestRate: Number(e.target.value) }))}
-                  className={errors.option1InterestRate ? 'border-red-500' : ''}
-                />
-                {errors.option1InterestRate && <p className="text-red-500 text-xs mt-1">{errors.option1InterestRate}</p>}
-              </div>
+              <Card className="bg-white/60 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Loan Option 2</CardTitle>
+                  <CardDescription>Enter details for the second loan option</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Loan Amount</label>
+                    <Input
+                      type="number"
+                      value={loanAmount2}
+                      onChange={(e) => setLoanAmount2(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
+                    <Input
+                      type="number"
+                      value={interestRate2}
+                      onChange={(e) => setInterestRate2(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Loan Term (months)</label>
+                    <Input
+                      type="number"
+                      value={loanTerm2}
+                      onChange={(e) => setLoanTerm2(Number(e.target.value))}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Term (Years)</label>
-                <Input
-                  type="number"
-                  value={option1.loanTerm}
-                  onChange={(e) => setOption1(prev => ({ ...prev, loanTerm: Number(e.target.value) }))}
-                  className={errors.option1LoanTerm ? 'border-red-500' : ''}
-                />
-                {errors.option1LoanTerm && <p className="text-red-500 text-xs mt-1">{errors.option1LoanTerm}</p>}
-              </div>
-            </CardContent>
-          </Card>
+            {/* Comparison Results */}
+            <Card className="bg-white/60 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Comparison Results</CardTitle>
+                <CardDescription>See a side-by-side comparison of the two loan options</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2"></th>
+                        <th className="text-center p-2">Loan Option 1</th>
+                        <th className="text-center p-2">Loan Option 2</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b">
+                        <td className="p-2">Loan Amount</td>
+                        <td className="text-center p-2">${comparisonResults[0].loanAmount.toFixed(0)}</td>
+                        <td className="text-center p-2">${comparisonResults[1].loanAmount.toFixed(0)}</td>
+                      </tr>
+                      <tr className="border-b">
+                        <td className="p-2">Interest Rate</td>
+                        <td className="text-center p-2">{comparisonResults[0].interestRate.toFixed(2)}%</td>
+                        <td className="text-center p-2">{comparisonResults[1].interestRate.toFixed(2)}%</td>
+                      </tr>
+                      <tr className="border-b">
+                        <td className="p-2">Loan Term (months)</td>
+                        <td className="text-center p-2">{comparisonResults[0].loanTerm}</td>
+                        <td className="text-center p-2">{comparisonResults[1].loanTerm}</td>
+                      </tr>
+                      <tr className="border-b">
+                        <td className="p-2">Monthly Payment</td>
+                        <td className="text-center p-2">${comparisonResults[0].monthlyPayment.toFixed(2)}</td>
+                        <td className="text-center p-2">${comparisonResults[1].monthlyPayment.toFixed(2)}</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2">Total Cost</td>
+                        <td className="text-center p-2">${comparisonResults[0].totalCost.toFixed(2)}</td>
+                        <td className="text-center p-2">${comparisonResults[1].totalCost.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Loan Option 2 */}
-          <Card className="bg-white/60 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-blue-600">Loan Option 2</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Vehicle Price ($)</label>
-                <Input
-                  type="number"
-                  value={option2.vehiclePrice}
-                  onChange={(e) => setOption2(prev => ({ ...prev, vehiclePrice: Number(e.target.value) }))}
-                  className={errors.option2VehiclePrice ? 'border-red-500' : ''}
-                />
-                {errors.option2VehiclePrice && <p className="text-red-500 text-xs mt-1">{errors.option2VehiclePrice}</p>}
+            {/* Bottom Ad */}
+            <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <div className="text-sm font-medium mb-1">Advertisement</div>
+                <div className="text-xs">728 x 90 Banner</div>
               </div>
+            </div>
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Down Payment ($)</label>
-                <Input
-                  type="number"
-                  value={option2.downPayment}
-                  onChange={(e) => setOption2(prev => ({ ...prev, downPayment: Number(e.target.value) }))}
-                  className={errors.option2DownPayment ? 'border-red-500' : ''}
-                />
-                {errors.option2DownPayment && <p className="text-red-500 text-xs mt-1">{errors.option2DownPayment}</p>}
+          {/* Right Sidebar Ad */}
+          <aside className="hidden lg:block w-40 flex-shrink-0">
+            <div className="sticky top-24">
+              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-xs font-medium mb-1">Advertisement</div>
+                  <div className="text-xs">160 x 600</div>
+                </div>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={option2.interestRate}
-                  onChange={(e) => setOption2(prev => ({ ...prev, interestRate: Number(e.target.value) }))}
-                  className={errors.option2InterestRate ? 'border-red-500' : ''}
-                />
-                {errors.option2InterestRate && <p className="text-red-500 text-xs mt-1">{errors.option2InterestRate}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Term (Years)</label>
-                <Input
-                  type="number"
-                  value={option2.loanTerm}
-                  onChange={(e) => setOption2(prev => ({ ...prev, loanTerm: Number(e.target.value) }))}
-                  className={errors.option2LoanTerm ? 'border-red-500' : ''}
-                />
-                {errors.option2LoanTerm && <p className="text-red-500 text-xs mt-1">{errors.option2LoanTerm}</p>}
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </aside>
         </div>
-
-        {/* Comparison Results */}
-        <Card className="bg-white/60 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Loan Comparison Results</CardTitle>
-            <CardDescription>Side-by-side comparison of your loan options</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Comparison</TableHead>
-                  <TableHead className="text-center">Option 1</TableHead>
-                  <TableHead className="text-center">Option 2</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">Loan Amount</TableCell>
-                  <TableCell className="text-center">${results1.loanAmount.toFixed(2)}</TableCell>
-                  <TableCell className="text-center">${results2.loanAmount.toFixed(2)}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Monthly Payment</TableCell>
-                  <TableCell className="text-center">${results1.monthlyPayment.toFixed(2)}</TableCell>
-                  <TableCell className="text-center">${results2.monthlyPayment.toFixed(2)}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Total Interest</TableCell>
-                  <TableCell className="text-center">${results1.totalInterest.toFixed(2)}</TableCell>
-                  <TableCell className="text-center">${results2.totalInterest.toFixed(2)}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Total Payment</TableCell>
-                  <TableCell className="text-center">${results1.totalPayment.toFixed(2)}</TableCell>
-                  <TableCell className="text-center">${results2.totalPayment.toFixed(2)}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-
-            {savingsAmount > 0 && (
-              <div className="mt-6 p-4 bg-gradient-to-r from-green-100 to-green-200 rounded-lg border border-green-300">
-                <p className="text-green-800 font-medium text-center">
-                  Option {betterOption} saves you ${savingsAmount.toFixed(2)} over the life of the loan compared to Option {betterOption === 1 ? 2 : 1}.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

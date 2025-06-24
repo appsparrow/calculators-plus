@@ -1,146 +1,117 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Home, Calculator, ArrowLeft } from 'lucide-react';
+import { Home, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-interface AmortizationRow {
-  month: number;
-  payment: number;
+interface MortgageResult {
+  monthlyPayment: number;
+  totalInterest: number;
+  totalPayment: number;
   principal: number;
   interest: number;
-  balance: number;
+  propertyTax: number;
+  homeInsurance: number;
 }
 
 const MortgageCalculator = () => {
-  const [homePrice, setHomePrice] = useState(300000);
-  const [downPayment, setDownPayment] = useState(60000);
+  const [homePrice, setHomePrice] = useState(500000);
+  const [downPayment, setDownPayment] = useState(20000);
   const [interestRate, setInterestRate] = useState(6.5);
   const [loanTerm, setLoanTerm] = useState(30);
-  const [propertyTax, setPropertyTax] = useState(3600);
-  const [insurance, setInsurance] = useState(1200);
-  const [isFHA, setIsFHA] = useState(false);
-  const [isVA, setIsVA] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [results, setResults] = useState({
-    monthlyPI: 0,
-    monthlyPITI: 0,
-    totalInterest: 0,
-    totalCost: 0,
-    loanAmount: 0
-  });
-  const [amortization, setAmortization] = useState<AmortizationRow[]>([]);
-
-  const validateInputs = () => {
-    const newErrors: {[key: string]: string} = {};
-    
-    if (homePrice <= 0) newErrors.homePrice = "Home price must be positive";
-    if (downPayment < 0) newErrors.downPayment = "Down payment cannot be negative";
-    if (downPayment > homePrice) newErrors.downPayment = "Down payment cannot exceed home price";
-    if (interestRate < 0) newErrors.interestRate = "Interest rate cannot be negative";
-    if (loanTerm <= 0) newErrors.loanTerm = "Loan term must be positive";
-    if (propertyTax < 0) newErrors.propertyTax = "Property tax cannot be negative";
-    if (insurance < 0) newErrors.insurance = "Insurance cannot be negative";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const [propertyTaxRate, setPropertyTaxRate] = useState(1.2);
+  const [homeInsuranceRate, setHomeInsuranceRate] = useState(0.3);
+  const [results, setResults] = useState<MortgageResult | null>(null);
+  const [showAmortization, setShowAmortization] = useState(false);
+  const [amortizationSchedule, setAmortizationSchedule] = useState<any[]>([]);
 
   const calculateMortgage = () => {
-    if (!validateInputs()) return;
+    const principal = homePrice - downPayment;
+    const monthlyInterestRate = interestRate / 100 / 12;
+    const numberOfPayments = loanTerm * 12;
 
-    let adjustedDownPayment = downPayment;
-    let adjustedHomePrice = homePrice;
+    const monthlyPayment =
+      (principal * monthlyInterestRate) /
+      (1 - Math.pow(1 + monthlyInterestRate, -numberOfPayments));
 
-    // FHA Loan adjustments
-    if (isFHA) {
-      const minDownPayment = homePrice * 0.035;
-      if (downPayment < minDownPayment) {
-        adjustedDownPayment = minDownPayment;
-      }
-    }
+    const totalPayment = monthlyPayment * numberOfPayments;
+    const totalInterest = totalPayment - principal;
 
-    // VA Loan adjustments
-    if (isVA) {
-      adjustedDownPayment = 0;
-      const vaFundingFee = homePrice * 0.023; // 2.3% funding fee
-      adjustedHomePrice = homePrice + vaFundingFee;
-    }
+    const annualPropertyTax = (homePrice * propertyTaxRate) / 100;
+    const monthlyPropertyTax = annualPropertyTax / 12;
 
-    const loanAmount = adjustedHomePrice - adjustedDownPayment;
-    const monthlyRate = interestRate / 100 / 12;
-    const numPayments = loanTerm * 12;
-
-    let monthlyPI = 0;
-    if (monthlyRate > 0) {
-      monthlyPI = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
-                  (Math.pow(1 + monthlyRate, numPayments) - 1);
-    } else {
-      monthlyPI = loanAmount / numPayments;
-    }
-
-    const monthlyTaxInsurance = (propertyTax + insurance) / 12;
-    let monthlyPITI = monthlyPI + monthlyTaxInsurance;
-
-    // Add FHA MIP if applicable
-    if (isFHA) {
-      const annualMIP = loanAmount * 0.0085; // 0.85% annual MIP
-      monthlyPITI += annualMIP / 12;
-    }
-
-    const totalInterest = (monthlyPI * numPayments) - loanAmount;
-    const totalCost = (monthlyPITI * numPayments) + adjustedDownPayment;
+    const annualHomeInsurance = (homePrice * homeInsuranceRate) / 100;
+    const monthlyHomeInsurance = annualHomeInsurance / 12;
 
     setResults({
-      monthlyPI: Math.round(monthlyPI),
-      monthlyPITI: Math.round(monthlyPITI),
-      totalInterest: Math.round(totalInterest),
-      totalCost: Math.round(totalCost),
-      loanAmount: Math.round(loanAmount)
+      monthlyPayment: monthlyPayment,
+      totalInterest: totalInterest,
+      totalPayment: totalPayment,
+      principal: principal,
+      interest: interestRate,
+      propertyTax: monthlyPropertyTax,
+      homeInsurance: monthlyHomeInsurance,
     });
 
-    // Generate amortization schedule
-    const schedule: AmortizationRow[] = [];
-    let remainingBalance = loanAmount;
+    generateAmortizationSchedule(
+      principal,
+      interestRate,
+      loanTerm,
+      monthlyPayment
+    );
+  };
 
-    for (let month = 1; month <= numPayments; month++) {
-      const interestPayment = remainingBalance * monthlyRate;
-      const principalPayment = monthlyPI - interestPayment;
-      remainingBalance = remainingBalance - principalPayment;
+  const generateAmortizationSchedule = (
+    principal: number,
+    interestRate: number,
+    loanTerm: number,
+    monthlyPayment: number
+  ) => {
+    let balance = principal;
+    const schedule = [];
+    const monthlyInterestRate = interestRate / 100 / 12;
+    const numberOfPayments = loanTerm * 12;
+
+    for (let i = 1; i <= numberOfPayments; i++) {
+      const interestPayment = balance * monthlyInterestRate;
+      const principalPayment = monthlyPayment - interestPayment;
+
+      balance -= principalPayment;
 
       schedule.push({
-        month,
-        payment: monthlyPI,
-        principal: principalPayment,
-        interest: interestPayment,
-        balance: Math.max(0, remainingBalance)
+        paymentNumber: i,
+        beginningBalance: balance + principalPayment,
+        monthlyPayment: monthlyPayment,
+        principalPayment: principalPayment,
+        interestPayment: interestPayment,
+        endingBalance: balance > 0 ? balance : 0,
       });
-
-      if (remainingBalance <= 0) break;
     }
 
-    setAmortization(schedule);
+    setAmortizationSchedule(schedule);
   };
 
   useEffect(() => {
     calculateMortgage();
-  }, [homePrice, downPayment, interestRate, loanTerm, propertyTax, insurance, isFHA, isVA]);
-
-  const isJumboLoan = results.loanAmount > 766550; // 2024 conforming loan limit
+  }, [homePrice, downPayment, interestRate, loanTerm, propertyTaxRate, homeInsuranceRate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-sky-50 to-pink-50">
+      {/* Meta tags for SEO */}
+      <head>
+        <title>Mortgage Calculator | Free Home Loan & Amortization Tool</title>
+        <meta name="description" content="Use our free mortgage calculator to estimate your monthly payments, total interest, and full amortization schedule. Compare FHA, VA, conventional, and jumbo loans." />
+        <meta name="keywords" content="mortgage calculator, home loan calculator, mortgage payment calculator, amortization schedule, FHA loan, VA loan, jumbo loan, property tax, home insurance, first-time homebuyer" />
+      </head>
+
       <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                <ArrowLeft className="w-5 h-5" />
-                <span>Back to Calculators</span>
+                <ChevronLeft className="w-5 h-5" />
               </Link>
             </div>
             <div className="flex items-center space-x-3">
@@ -151,7 +122,7 @@ const MortgageCalculator = () => {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
                   Mortgage Calculator
                 </h1>
-                <p className="text-sm text-gray-600">Calculate monthly payments & total costs</p>
+                <p className="text-sm text-gray-600">Calculate monthly payments and amortization</p>
               </div>
             </div>
           </div>
@@ -159,189 +130,171 @@ const MortgageCalculator = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Input Panel */}
-          <Card className="bg-white/60 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Loan Details</CardTitle>
-              <CardDescription>Enter your mortgage information</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Home Price ($)</label>
-                <Input
-                  type="number"
-                  value={homePrice}
-                  onChange={(e) => setHomePrice(Number(e.target.value))}
-                  className={errors.homePrice ? 'border-red-500' : ''}
-                />
-                {errors.homePrice && <p className="text-red-500 text-xs mt-1">{errors.homePrice}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Down Payment ($)</label>
-                <Input
-                  type="number"
-                  value={downPayment}
-                  onChange={(e) => setDownPayment(Number(e.target.value))}
-                  className={errors.downPayment ? 'border-red-500' : ''}
-                />
-                {errors.downPayment && <p className="text-red-500 text-xs mt-1">{errors.downPayment}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={interestRate}
-                  onChange={(e) => setInterestRate(Number(e.target.value))}
-                  className={errors.interestRate ? 'border-red-500' : ''}
-                />
-                {errors.interestRate && <p className="text-red-500 text-xs mt-1">{errors.interestRate}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Loan Term (Years)</label>
-                <Input
-                  type="number"
-                  value={loanTerm}
-                  onChange={(e) => setLoanTerm(Number(e.target.value))}
-                  className={errors.loanTerm ? 'border-red-500' : ''}
-                />
-                {errors.loanTerm && <p className="text-red-500 text-xs mt-1">{errors.loanTerm}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Property Tax ($/year)</label>
-                <Input
-                  type="number"
-                  value={propertyTax}
-                  onChange={(e) => setPropertyTax(Number(e.target.value))}
-                  className={errors.propertyTax ? 'border-red-500' : ''}
-                />
-                {errors.propertyTax && <p className="text-red-500 text-xs mt-1">{errors.propertyTax}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Insurance ($/year)</label>
-                <Input
-                  type="number"
-                  value={insurance}
-                  onChange={(e) => setInsurance(Number(e.target.value))}
-                  className={errors.insurance ? 'border-red-500' : ''}
-                />
-                {errors.insurance && <p className="text-red-500 text-xs mt-1">{errors.insurance}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="font-medium">Loan Type</h4>
-                <div className="flex space-x-4">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={isFHA}
-                      onChange={(e) => {
-                        setIsFHA(e.target.checked);
-                        if (e.target.checked) setIsVA(false);
-                      }}
-                    />
-                    <span className="text-sm">FHA Loan</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={isVA}
-                      onChange={(e) => {
-                        setIsVA(e.target.checked);
-                        if (e.target.checked) setIsFHA(false);
-                      }}
-                    />
-                    <span className="text-sm">VA Loan</span>
-                  </label>
+        <div className="flex gap-8">
+          {/* Left Sidebar Ad */}
+          <aside className="hidden lg:block w-40 flex-shrink-0">
+            <div className="sticky top-24">
+              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-xs font-medium mb-1">Advertisement</div>
+                  <div className="text-xs">160 x 600</div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </aside>
 
-          {/* Results Panel */}
-          <Card className="bg-white/60 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Results & Analysis
-                {isJumboLoan && <Badge variant="secondary">Jumbo Loan</Badge>}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-center p-4 bg-gradient-to-r from-orange-400 to-pink-400 rounded-lg text-white">
-                  <p className="text-sm opacity-90">Monthly P&I</p>
-                  <p className="text-2xl font-bold">${results.monthlyPI.toLocaleString()}</p>
+          {/* Main Content */}
+          <div className="flex-1 space-y-8">
+            {/* Input Panel */}
+            <Card className="bg-white/60 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Mortgage Details</CardTitle>
+                <CardDescription>Enter your details to calculate your mortgage</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Home Price</label>
+                  <Input
+                    type="number"
+                    value={homePrice}
+                    onChange={(e) => setHomePrice(Number(e.target.value))}
+                  />
                 </div>
-                <div className="text-center p-4 bg-gradient-to-r from-sky-400 to-pink-400 rounded-lg text-white">
-                  <p className="text-sm opacity-90">Monthly PITI</p>
-                  <p className="text-2xl font-bold">${results.monthlyPITI.toLocaleString()}</p>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Down Payment</label>
+                  <Input
+                    type="number"
+                    value={downPayment}
+                    onChange={(e) => setDownPayment(Number(e.target.value))}
+                  />
                 </div>
-                <div className="text-center p-4 bg-gradient-to-r from-orange-400 to-sky-400 rounded-lg text-white">
-                  <p className="text-sm opacity-90">Total Interest</p>
-                  <p className="text-2xl font-bold">${results.totalInterest.toLocaleString()}</p>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
+                  <Input
+                    type="number"
+                    value={interestRate}
+                    onChange={(e) => setInterestRate(Number(e.target.value))}
+                  />
                 </div>
-                <div className="text-center p-4 bg-gradient-to-r from-pink-400 to-sky-400 rounded-lg text-white">
-                  <p className="text-sm opacity-90">Total Cost</p>
-                  <p className="text-2xl font-bold">${results.totalCost.toLocaleString()}</p>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Loan Term (years)</label>
+                  <Input
+                    type="number"
+                    value={loanTerm}
+                    onChange={(e) => setLoanTerm(Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Property Tax Rate (%)</label>
+                  <Input
+                    type="number"
+                    value={propertyTaxRate}
+                    onChange={(e) => setPropertyTaxRate(Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Home Insurance Rate (%)</label>
+                  <Input
+                    type="number"
+                    value={homeInsuranceRate}
+                    onChange={(e) => setHomeInsuranceRate(Number(e.target.value))}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Results Panel */}
+            {results && (
+              <Card className="bg-white/60 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Mortgage Results</CardTitle>
+                  <CardDescription>Your estimated monthly payments</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Monthly Payment:</p>
+                      <p className="text-2xl font-bold">${results.monthlyPayment.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Total Interest:</p>
+                      <p className="text-2xl font-bold">${results.totalInterest.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Property Tax (Monthly):</p>
+                      <p className="text-2xl font-bold">${results.propertyTax.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Home Insurance (Monthly):</p>
+                      <p className="text-2xl font-bold">${results.homeInsurance.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <Button onClick={() => setShowAmortization(!showAmortization)}>
+                    {showAmortization ? 'Hide Amortization Schedule' : 'Show Amortization Schedule'}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Amortization Schedule */}
+            {showAmortization && (
+              <Card className="bg-white/60 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Amortization Schedule</CardTitle>
+                  <CardDescription>A breakdown of each payment</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Payment #</th>
+                          <th className="text-left p-2">Beginning Balance</th>
+                          <th className="text-left p-2">Monthly Payment</th>
+                          <th className="text-left p-2">Principal Payment</th>
+                          <th className="text-left p-2">Interest Payment</th>
+                          <th className="text-left p-2">Ending Balance</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {amortizationSchedule.map((payment, index) => (
+                          <tr key={index} className="border-b">
+                            <td className="p-2">{payment.paymentNumber}</td>
+                            <td className="p-2">${payment.beginningBalance.toFixed(2)}</td>
+                            <td className="p-2">${payment.monthlyPayment.toFixed(2)}</td>
+                            <td className="p-2">${payment.principalPayment.toFixed(2)}</td>
+                            <td className="p-2">${payment.interestPayment.toFixed(2)}</td>
+                            <td className="p-2">${payment.endingBalance.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Bottom Ad */}
+            <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <div className="text-sm font-medium mb-1">Advertisement</div>
+                <div className="text-xs">728 x 90 Banner</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar Ad */}
+          <aside className="hidden lg:block w-40 flex-shrink-0">
+            <div className="sticky top-24">
+              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-xs font-medium mb-1">Advertisement</div>
+                  <div className="text-xs">160 x 600</div>
                 </div>
               </div>
-
-              <div className="space-y-2 text-sm">
-                <p><strong>Loan Amount:</strong> ${results.loanAmount.toLocaleString()}</p>
-                {isFHA && <p className="text-blue-600">✓ FHA loan with mortgage insurance premium included</p>}
-                {isVA && <p className="text-green-600">✓ VA loan with funding fee included</p>}
-                {isJumboLoan && <p className="text-orange-600">⚠ This is a jumbo loan - rates may differ</p>}
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </aside>
         </div>
-
-        {/* Amortization Schedule */}
-        {amortization.length > 0 && (
-          <Card className="mt-8 bg-white/60 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Amortization Schedule</CardTitle>
-              <CardDescription>Payment breakdown over the loan term</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="max-h-96 overflow-y-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Month</TableHead>
-                      <TableHead>Payment</TableHead>
-                      <TableHead>Principal</TableHead>
-                      <TableHead>Interest</TableHead>
-                      <TableHead>Balance</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {amortization.slice(0, 60).map((row) => (
-                      <TableRow key={row.month}>
-                        <TableCell>{row.month}</TableCell>
-                        <TableCell>${row.payment.toFixed(2)}</TableCell>
-                        <TableCell>${row.principal.toFixed(2)}</TableCell>
-                        <TableCell>${row.interest.toFixed(2)}</TableCell>
-                        <TableCell>${row.balance.toFixed(2)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                {amortization.length > 60 && (
-                  <p className="text-center text-gray-500 mt-4">
-                    Showing first 60 payments of {amortization.length}
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );
