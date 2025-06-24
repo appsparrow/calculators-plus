@@ -33,14 +33,15 @@ const GpaCalculator = () => {
     { name: '', credits: 3, grade: 'A' },
   ]);
   const [semesterGPA, setSemesterGPA] = useState(0.0);
-  const [cumulativeGPA, setCumulativeGPA] = useState(3.5); // Example initial value
-  const [totalCredits, setTotalCredits] = useState(60); // Example initial value
+  const [previousGPA, setPreviousGPA] = useState(3.5);
+  const [previousCredits, setPreviousCredits] = useState(60);
+  const [cumulativeGPA, setCumulativeGPA] = useState(3.5);
 
   const addCourse = () => {
     setCourses([...courses, { name: '', credits: 3, grade: 'A' }]);
   };
 
-  const updateCourse = (index: number, field: string, value: any) => {
+  const updateCourse = (index: number, field: keyof Course, value: any) => {
     const updatedCourses = [...courses];
     updatedCourses[index][field] = value;
     setCourses(updatedCourses);
@@ -60,47 +61,46 @@ const GpaCalculator = () => {
     setSemesterGPA(parseFloat(newSemesterGPA.toFixed(2)));
 
     // Calculate cumulative GPA
-    const totalCumulativeGradePoints = cumulativeGPA * totalCredits + totalGradePoints;
-    const newCumulativeGPA = (totalCumulativeGradePoints) / (totalCredits + totalCreditsAttempted);
+    const totalCumulativeGradePoints = previousGPA * previousCredits + totalGradePoints;
+    const totalCumulativeCredits = previousCredits + totalCreditsAttempted;
+    const newCumulativeGPA = totalCumulativeCredits === 0 ? 0 : totalCumulativeGradePoints / totalCumulativeCredits;
     setCumulativeGPA(parseFloat(newCumulativeGPA.toFixed(2)));
-    setTotalCredits(totalCredits + totalCreditsAttempted);
   };
 
   useEffect(() => {
     calculateGPA();
-  }, [courses, cumulativeGPA, totalCredits]);
+  }, [courses, previousGPA, previousCredits]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-sky-50 to-pink-50">
-      {/* Meta tags for SEO */}
       <head>
         <title>GPA Calculator | Calculate Your Grade Point Average</title>
         <meta name="description" content="Easily calculate your GPA with our free GPA calculator. Compute your semester and cumulative GPA by entering your grades and credits." />
         <meta name="keywords" content="GPA calculator, grade point average, calculate GPA, semester GPA, cumulative GPA, college GPA, high school GPA" />
       </head>
 
-        <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                  <ChevronLeft className="w-5 h-5" />
-                </Link>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+                <ChevronLeft className="w-5 h-5" />
+              </Link>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
+                <GraduationCap className="w-6 h-6 text-white" />
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
-                  <GraduationCap className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    GPA Calculator
-                  </h1>
-                  <p className="text-sm text-gray-600">Calculate semester and cumulative GPA</p>
-                </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  GPA Calculator
+                </h1>
+                <p className="text-sm text-gray-600">Calculate semester and cumulative GPA</p>
               </div>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
@@ -165,28 +165,29 @@ const GpaCalculator = () => {
               </CardContent>
             </Card>
 
-            {/* Cumulative GPA Input */}
+            {/* Previous GPA Input */}
             <Card className="bg-white/60 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle>Cumulative GPA</CardTitle>
-                <CardDescription>Enter your current cumulative GPA and credits</CardDescription>
+                <CardTitle>Previous Academic Record</CardTitle>
+                <CardDescription>Enter your previous cumulative GPA and credits</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Cumulative GPA</label>
+                    <label className="block text-sm font-medium mb-1">Previous Cumulative GPA</label>
                     <Input
                       type="number"
-                      value={cumulativeGPA}
-                      onChange={(e) => setCumulativeGPA(Number(e.target.value))}
+                      step="0.01"
+                      value={previousGPA}
+                      onChange={(e) => setPreviousGPA(Number(e.target.value))}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Total Credits</label>
+                    <label className="block text-sm font-medium mb-1">Previous Total Credits</label>
                     <Input
                       type="number"
-                      value={totalCredits}
-                      onChange={(e) => setTotalCredits(Number(e.target.value))}
+                      value={previousCredits}
+                      onChange={(e) => setPreviousCredits(Number(e.target.value))}
                     />
                   </div>
                 </div>

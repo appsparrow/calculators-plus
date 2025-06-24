@@ -14,6 +14,15 @@ interface CalorieResult {
   fat: number;
 }
 
+interface Micronutrients {
+  vitaminC: number;
+  vitaminD: number;
+  iron: number;
+  calcium: number;
+  fiber: number;
+  sodium: number;
+}
+
 const CalorieCalculator = () => {
   const [age, setAge] = useState(30);
   const [gender, setGender] = useState<'male' | 'female'>('male');
@@ -22,6 +31,7 @@ const CalorieCalculator = () => {
   const [activityLevel, setActivityLevel] = useState(1.55);
   const [goal, setGoal] = useState<'lose' | 'maintain' | 'gain'>('maintain');
   const [results, setResults] = useState<CalorieResult | null>(null);
+  const [micronutrients, setMicronutrients] = useState<Micronutrients | null>(null);
 
   const calculateCalories = () => {
     let bmr: number;
@@ -50,6 +60,23 @@ const CalorieCalculator = () => {
       protein: protein,
       carbs: carbs,
       fat: fat,
+    });
+
+    // Calculate micronutrients based on gender and age
+    const vitaminC = gender === 'male' ? 90 : 75;
+    const vitaminD = 15;
+    const iron = gender === 'male' ? 8 : (age > 50 ? 8 : 18);
+    const calcium = age > 50 ? 1200 : 1000;
+    const fiber = Math.round(calories / 1000 * 14);
+    const sodium = 2300;
+
+    setMicronutrients({
+      vitaminC,
+      vitaminD,
+      iron,
+      calcium,
+      fiber,
+      sodium,
     });
   };
 
@@ -102,136 +129,184 @@ const CalorieCalculator = () => {
             </div>
           </aside>
 
-          {/* Main Content */}
-          <div className="flex-1 space-y-8">
+          <div className="flex-1 flex gap-8">
             {/* Input Panel */}
-            <Card className="bg-white/60 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Your Information</CardTitle>
-                <CardDescription>Enter your details to calculate your calorie needs</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Age</label>
-                  <Input
-                    type="number"
-                    value={age}
-                    onChange={(e) => setAge(Number(e.target.value))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Gender</label>
-                  <div className="flex space-x-4">
-                    <Button
-                      variant={gender === 'male' ? 'default' : 'outline'}
-                      onClick={() => setGender('male')}
-                    >
-                      Male
-                    </Button>
-                    <Button
-                      variant={gender === 'female' ? 'default' : 'outline'}
-                      onClick={() => setGender('female')}
-                    >
-                      Female
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Height (cm)</label>
-                  <Input
-                    type="number"
-                    value={height}
-                    onChange={(e) => setHeight(Number(e.target.value))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Weight (kg)</label>
-                  <Input
-                    type="number"
-                    value={weight}
-                    onChange={(e) => setWeight(Number(e.target.value))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Activity Level</label>
-                  <select
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={activityLevel}
-                    onChange={(e) => setActivityLevel(Number(e.target.value))}
-                  >
-                    <option value={1.2}>Sedentary (little to no exercise)</option>
-                    <option value={1.375}>Lightly Active (light exercise/sports 1-3 days/week)</option>
-                    <option value={1.55}>Moderately Active (moderate exercise/sports 3-5 days/week)</option>
-                    <option value={1.725}>Very Active (hard exercise/sports 6-7 days a week)</option>
-                    <option value={1.9}>Extremely Active (very hard exercise/sports & physical job)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Goal</label>
-                  <div className="flex space-x-4">
-                    <Button
-                      variant={goal === 'lose' ? 'default' : 'outline'}
-                      onClick={() => setGoal('lose')}
-                    >
-                      Lose Weight
-                    </Button>
-                    <Button
-                      variant={goal === 'maintain' ? 'default' : 'outline'}
-                      onClick={() => setGoal('maintain')}
-                    >
-                      Maintain Weight
-                    </Button>
-                    <Button
-                      variant={goal === 'gain' ? 'default' : 'outline'}
-                      onClick={() => setGoal('gain')}
-                    >
-                      Gain Weight
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Results Panel */}
-            {results && (
+            <div className="flex-1 space-y-8">
               <Card className="bg-white/60 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Calorie Results</CardTitle>
-                  <CardDescription>Your estimated daily calorie needs</CardDescription>
+                  <CardTitle>Your Information</CardTitle>
+                  <CardDescription>Enter your details to calculate your calorie needs</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Basal Metabolic Rate (BMR):</p>
-                      <p className="text-2xl font-bold">{results.bmr.toFixed(0)} calories</p>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Age</label>
+                    <Input
+                      type="number"
+                      value={age}
+                      onChange={(e) => setAge(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Gender</label>
+                    <div className="flex space-x-4">
+                      <Button
+                        variant={gender === 'male' ? 'default' : 'outline'}
+                        onClick={() => setGender('male')}
+                      >
+                        Male
+                      </Button>
+                      <Button
+                        variant={gender === 'female' ? 'default' : 'outline'}
+                        onClick={() => setGender('female')}
+                      >
+                        Female
+                      </Button>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Daily Calories:</p>
-                      <p className="text-2xl font-bold">{results.calories.toFixed(0)} calories</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Protein:</p>
-                      <p className="text-2xl font-bold">{results.protein.toFixed(0)}g</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Carbs:</p>
-                      <p className="text-2xl font-bold">{results.carbs.toFixed(0)}g</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Fat:</p>
-                      <p className="text-2xl font-bold">{results.fat.toFixed(0)}g</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Height (cm)</label>
+                    <Input
+                      type="number"
+                      value={height}
+                      onChange={(e) => setHeight(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Weight (kg)</label>
+                    <Input
+                      type="number"
+                      value={weight}
+                      onChange={(e) => setWeight(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Activity Level</label>
+                    <select
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={activityLevel}
+                      onChange={(e) => setActivityLevel(Number(e.target.value))}
+                    >
+                      <option value={1.2}>Sedentary (little to no exercise)</option>
+                      <option value={1.375}>Lightly Active (light exercise/sports 1-3 days/week)</option>
+                      <option value={1.55}>Moderately Active (moderate exercise/sports 3-5 days/week)</option>
+                      <option value={1.725}>Very Active (hard exercise/sports 6-7 days a week)</option>
+                      <option value={1.9}>Extremely Active (very hard exercise/sports & physical job)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Goal</label>
+                    <div className="flex space-x-4">
+                      <Button
+                        variant={goal === 'lose' ? 'default' : 'outline'}
+                        onClick={() => setGoal('lose')}
+                      >
+                        Lose Weight
+                      </Button>
+                      <Button
+                        variant={goal === 'maintain' ? 'default' : 'outline'}
+                        onClick={() => setGoal('maintain')}
+                      >
+                        Maintain Weight
+                      </Button>
+                      <Button
+                        variant={goal === 'gain' ? 'default' : 'outline'}
+                        onClick={() => setGoal('gain')}
+                      >
+                        Gain Weight
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Bottom Ad */}
-            <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <div className="text-sm font-medium mb-1">Advertisement</div>
-                <div className="text-xs">728 x 90 Banner</div>
+              {/* Bottom Ad */}
+              <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-sm font-medium mb-1">Advertisement</div>
+                  <div className="text-xs">728 x 90 Banner</div>
+                </div>
               </div>
+            </div>
+
+            {/* Results Panel */}
+            <div className="w-80 space-y-6">
+              {results && (
+                <>
+                  {/* Main Results */}
+                  <div className="grid grid-cols-1 gap-4">
+                    <Card className="bg-white/60 backdrop-blur-sm">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-sm font-medium text-gray-500">Daily Calories</p>
+                        <p className="text-2xl font-bold text-green-600">{results.calories.toFixed(0)}</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/60 backdrop-blur-sm">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-sm font-medium text-gray-500">BMR</p>
+                        <p className="text-2xl font-bold text-blue-600">{results.bmr.toFixed(0)}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Macronutrients */}
+                  <Card className="bg-white/60 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Macronutrients</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium">Protein:</span>
+                        <span className="font-bold">{results.protein.toFixed(0)}g</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium">Carbs:</span>
+                        <span className="font-bold">{results.carbs.toFixed(0)}g</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium">Fat:</span>
+                        <span className="font-bold">{results.fat.toFixed(0)}g</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Micronutrients */}
+                  {micronutrients && (
+                    <Card className="bg-white/60 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="text-lg">Daily Micronutrients</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="text-gray-600">Vitamin C:</span>
+                            <p className="font-semibold">{micronutrients.vitaminC}mg</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Vitamin D:</span>
+                            <p className="font-semibold">{micronutrients.vitaminD}μg</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Iron:</span>
+                            <p className="font-semibold">{micronutrients.iron}mg</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Calcium:</span>
+                            <p className="font-semibold">{micronutrients.calcium}mg</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Fiber:</span>
+                            <p className="font-semibold">{micronutrients.fiber}g</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Sodium:</span>
+                            <p className="font-semibold">{micronutrients.sodium}mg</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
             </div>
           </div>
 

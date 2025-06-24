@@ -20,7 +20,7 @@ const DebtPayoffCalculator = () => {
     { name: 'Loan', balance: 10000, interestRate: 8, minimumPayment: 200 },
   ]);
   const [monthlyPayment, setMonthlyPayment] = useState(500);
-  const [payoffStrategy, setPayoffStrategy] = useState('avalanche'); // 'avalanche' or 'snowball'
+  const [payoffStrategy, setPayoffStrategy] = useState('avalanche');
   const [results, setResults] = useState<any>(null);
 
   const calculatePayoff = () => {
@@ -68,6 +68,22 @@ const DebtPayoffCalculator = () => {
       monthsToPayoff: months,
       totalInterestPaid: totalInterestPaid,
     });
+  };
+
+  const tryScenario = (scenarioType: string) => {
+    switch (scenarioType) {
+      case 'extra100':
+        setMonthlyPayment(monthlyPayment + 100);
+        break;
+      case 'extra200':
+        setMonthlyPayment(monthlyPayment + 200);
+        break;
+      case 'consolidate':
+        const totalBalance = debts.reduce((sum, debt) => sum + debt.balance, 0);
+        const avgRate = debts.reduce((sum, debt) => sum + debt.interestRate * debt.balance, 0) / totalBalance;
+        setDebts([{ name: 'Consolidated Loan', balance: totalBalance, interestRate: avgRate * 0.8, minimumPayment: totalBalance * 0.02 }]);
+        break;
+    }
   };
 
   useEffect(() => {
@@ -119,132 +135,170 @@ const DebtPayoffCalculator = () => {
             </div>
           </aside>
 
-          {/* Main Content */}
-          <div className="flex-1 space-y-8">
-            {/* Input Panel */}
-            <Card className="bg-white/60 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Debt Information</CardTitle>
-                <CardDescription>Enter your debt details</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {debts.map((debt, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Debt Name</label>
-                      <Input
-                        type="text"
-                        value={debt.name}
-                        onChange={(e) => {
-                          const newDebts = [...debts];
-                          newDebts[index].name = e.target.value;
-                          setDebts(newDebts);
-                        }}
-                      />
+          <div className="flex-1 flex gap-8">
+            {/* Input Panel - 2/3 width */}
+            <div className="flex-[2] space-y-8">
+              <Card className="bg-white/60 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Debt Information</CardTitle>
+                  <CardDescription>Enter your debt details</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {debts.map((debt, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Debt Name</label>
+                        <Input
+                          type="text"
+                          value={debt.name}
+                          onChange={(e) => {
+                            const newDebts = [...debts];
+                            newDebts[index].name = e.target.value;
+                            setDebts(newDebts);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Balance</label>
+                        <Input
+                          type="number"
+                          value={debt.balance}
+                          onChange={(e) => {
+                            const newDebts = [...debts];
+                            newDebts[index].balance = Number(e.target.value);
+                            setDebts(newDebts);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
+                        <Input
+                          type="number"
+                          value={debt.interestRate}
+                          onChange={(e) => {
+                            const newDebts = [...debts];
+                            newDebts[index].interestRate = Number(e.target.value);
+                            setDebts(newDebts);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Minimum Payment</label>
+                        <Input
+                          type="number"
+                          value={debt.minimumPayment}
+                          onChange={(e) => {
+                            const newDebts = [...debts];
+                            newDebts[index].minimumPayment = Number(e.target.value);
+                            setDebts(newDebts);
+                          }}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Balance</label>
-                      <Input
-                        type="number"
-                        value={debt.balance}
-                        onChange={(e) => {
-                          const newDebts = [...debts];
-                          newDebts[index].balance = Number(e.target.value);
-                          setDebts(newDebts);
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
-                      <Input
-                        type="number"
-                        value={debt.interestRate}
-                        onChange={(e) => {
-                          const newDebts = [...debts];
-                          newDebts[index].interestRate = Number(e.target.value);
-                          setDebts(newDebts);
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Minimum Payment</label>
-                      <Input
-                        type="number"
-                        value={debt.minimumPayment}
-                        onChange={(e) => {
-                          const newDebts = [...debts];
-                          newDebts[index].minimumPayment = Number(e.target.value);
-                          setDebts(newDebts);
-                        }}
-                      />
-                    </div>
+                  ))}
+                  <div>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        setDebts([
+                          ...debts,
+                          { name: `New Debt ${debts.length + 1}`, balance: 0, interestRate: 0, minimumPayment: 0 },
+                        ])
+                      }
+                    >
+                      Add Debt
+                    </Button>
                   </div>
-                ))}
-                <div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Total Monthly Payment</label>
+                    <Input
+                      type="number"
+                      value={monthlyPayment}
+                      onChange={(e) => setMonthlyPayment(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Payoff Strategy</label>
+                    <select
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={payoffStrategy}
+                      onChange={(e) => setPayoffStrategy(e.target.value)}
+                    >
+                      <option value="avalanche">Debt Avalanche (Highest Interest First)</option>
+                      <option value="snowball">Debt Snowball (Lowest Balance First)</option>
+                    </select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Bottom Ad */}
+              <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-sm font-medium mb-1">Advertisement</div>
+                  <div className="text-xs">728 x 90 Banner</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Results and Scenarios Panel - 1/3 width */}
+            <div className="flex-1 space-y-6">
+              {/* Results Panel */}
+              <Card className="bg-white/60 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Payoff Results</CardTitle>
+                  <CardDescription>Estimated time and interest to payoff</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {results ? (
+                    <>
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-500">Months to Payoff</p>
+                        <p className="text-2xl font-bold text-green-600">{results.monthsToPayoff} months</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-500">Total Interest Paid</p>
+                        <p className="text-2xl font-bold text-red-600">${results.totalInterestPaid.toFixed(2)}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-gray-500">Enter debt details to see payoff estimates.</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Scenarios Panel */}
+              <Card className="bg-white/60 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Try Scenarios</CardTitle>
+                  <CardDescription>See how changes affect your payoff</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
                   <Button
                     variant="outline"
-                    onClick={() =>
-                      setDebts([
-                        ...debts,
-                        { name: `New Debt ${debts.length + 1}`, balance: 0, interestRate: 0, minimumPayment: 0 },
-                      ])
-                    }
+                    size="sm"
+                    className="w-full"
+                    onClick={() => tryScenario('extra100')}
                   >
-                    Add Debt
+                    +$100/month
                   </Button>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Total Monthly Payment</label>
-                  <Input
-                    type="number"
-                    value={monthlyPayment}
-                    onChange={(e) => setMonthlyPayment(Number(e.target.value))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Payoff Strategy</label>
-                  <select
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={payoffStrategy}
-                    onChange={(e) => setPayoffStrategy(e.target.value)}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => tryScenario('extra200')}
                   >
-                    <option value="avalanche">Debt Avalanche (Highest Interest First)</option>
-                    <option value="snowball">Debt Snowball (Lowest Balance First)</option>
-                  </select>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Results Panel */}
-            <Card className="bg-white/60 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Payoff Results</CardTitle>
-                <CardDescription>Estimated time and interest to payoff</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {results ? (
-                  <>
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Months to Payoff</span>
-                      <span className="font-bold">{results.monthsToPayoff} months</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Total Interest Paid</span>
-                      <span className="font-bold">${results.totalInterestPaid.toFixed(2)}</span>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-gray-500">Enter debt details to see payoff estimates.</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Bottom Ad */}
-            <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <div className="text-sm font-medium mb-1">Advertisement</div>
-                <div className="text-xs">728 x 90 Banner</div>
-              </div>
+                    +$200/month
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => tryScenario('consolidate')}
+                  >
+                    Debt Consolidation
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </div>
 
