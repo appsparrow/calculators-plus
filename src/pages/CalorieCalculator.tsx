@@ -62,7 +62,6 @@ const CalorieCalculator = () => {
       fat: fat,
     });
 
-    // Calculate micronutrients based on gender and age
     const vitaminC = gender === 'male' ? 90 : 75;
     const vitaminD = 15;
     const iron = gender === 'male' ? 8 : (age > 50 ? 8 : 18);
@@ -101,11 +100,11 @@ const CalorieCalculator = () => {
               </Link>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-400 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
                 <Flame className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-600 bg-clip-text text-transparent">
                   Calorie Calculator
                 </h1>
                 <p className="text-sm text-gray-600">Calculate daily calorie needs and macros</p>
@@ -116,9 +115,9 @@ const CalorieCalculator = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Left Sidebar Ad */}
-          <aside className="hidden lg:block w-40 flex-shrink-0">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Sidebar Ad - Hidden on mobile */}
+          <aside className="hidden xl:block w-40 flex-shrink-0">
             <div className="sticky top-24">
               <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
                 <div className="text-center text-gray-500">
@@ -129,7 +128,7 @@ const CalorieCalculator = () => {
             </div>
           </aside>
 
-          <div className="flex-1 flex gap-8">
+          <div className="flex-1 flex flex-col lg:flex-row gap-8">
             {/* Input Panel */}
             <div className="flex-1 space-y-8">
               <Card className="bg-white/60 backdrop-blur-sm">
@@ -138,46 +137,54 @@ const CalorieCalculator = () => {
                   <CardDescription>Enter your details to calculate your calorie needs</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Age</label>
-                    <Input
-                      type="number"
-                      value={age}
-                      onChange={(e) => setAge(Number(e.target.value))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Gender</label>
-                    <div className="flex space-x-4">
-                      <Button
-                        variant={gender === 'male' ? 'default' : 'outline'}
-                        onClick={() => setGender('male')}
-                      >
-                        Male
-                      </Button>
-                      <Button
-                        variant={gender === 'female' ? 'default' : 'outline'}
-                        onClick={() => setGender('female')}
-                      >
-                        Female
-                      </Button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Age</label>
+                      <Input
+                        type="number"
+                        value={age}
+                        onChange={(e) => setAge(Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Gender</label>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant={gender === 'male' ? 'default' : 'outline'}
+                          onClick={() => setGender('male')}
+                          className="flex-1"
+                          size="sm"
+                        >
+                          Male
+                        </Button>
+                        <Button
+                          variant={gender === 'female' ? 'default' : 'outline'}
+                          onClick={() => setGender('female')}
+                          className="flex-1"
+                          size="sm"
+                        >
+                          Female
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Height (cm)</label>
-                    <Input
-                      type="number"
-                      value={height}
-                      onChange={(e) => setHeight(Number(e.target.value))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Weight (kg)</label>
-                    <Input
-                      type="number"
-                      value={weight}
-                      onChange={(e) => setWeight(Number(e.target.value))}
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Height (cm)</label>
+                      <Input
+                        type="number"
+                        value={height}
+                        onChange={(e) => setHeight(Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Weight (kg)</label>
+                      <Input
+                        type="number"
+                        value={weight}
+                        onChange={(e) => setWeight(Number(e.target.value))}
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Activity Level</label>
@@ -195,22 +202,25 @@ const CalorieCalculator = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Goal</label>
-                    <div className="flex space-x-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <Button
                         variant={goal === 'lose' ? 'default' : 'outline'}
                         onClick={() => setGoal('lose')}
+                        size="sm"
                       >
                         Lose Weight
                       </Button>
                       <Button
                         variant={goal === 'maintain' ? 'default' : 'outline'}
                         onClick={() => setGoal('maintain')}
+                        size="sm"
                       >
                         Maintain Weight
                       </Button>
                       <Button
                         variant={goal === 'gain' ? 'default' : 'outline'}
                         onClick={() => setGoal('gain')}
+                        size="sm"
                       >
                         Gain Weight
                       </Button>
@@ -219,8 +229,8 @@ const CalorieCalculator = () => {
                 </CardContent>
               </Card>
 
-              {/* Bottom Ad */}
-              <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+              {/* Bottom Ad - Show on mobile */}
+              <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center lg:hidden">
                 <div className="text-center text-gray-500">
                   <div className="text-sm font-medium mb-1">Advertisement</div>
                   <div className="text-xs">728 x 90 Banner</div>
@@ -229,11 +239,11 @@ const CalorieCalculator = () => {
             </div>
 
             {/* Results Panel */}
-            <div className="w-80 space-y-6">
+            <div className="w-full lg:w-80 space-y-6">
               {results && (
                 <>
                   {/* Main Results */}
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
                     <Card className="bg-white/60 backdrop-blur-sm">
                       <CardContent className="p-4 text-center">
                         <p className="text-sm font-medium text-gray-500">Daily Calories</p>
@@ -271,47 +281,52 @@ const CalorieCalculator = () => {
 
                   {/* Micronutrients */}
                   {micronutrients && (
-                    <Card className="bg-white/60 backdrop-blur-sm">
-                      <CardHeader>
-                        <CardTitle className="text-lg">Daily Micronutrients</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <span className="text-gray-600">Vitamin C:</span>
-                            <p className="font-semibold">{micronutrients.vitaminC}mg</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Vitamin D:</span>
-                            <p className="font-semibold">{micronutrients.vitaminD}μg</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Iron:</span>
-                            <p className="font-semibold">{micronutrients.iron}mg</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Calcium:</span>
-                            <p className="font-semibold">{micronutrients.calcium}mg</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Fiber:</span>
-                            <p className="font-semibold">{micronutrients.fiber}g</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Sodium:</span>
-                            <p className="font-semibold">{micronutrients.sodium}mg</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div className="grid grid-cols-3 gap-3">
+                      <Card className="bg-white/60 backdrop-blur-sm">
+                        <CardContent className="p-3 text-center">
+                          <p className="text-xs text-gray-600 mb-1">Vitamin C</p>
+                          <p className="font-semibold">{micronutrients.vitaminC}mg</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/60 backdrop-blur-sm">
+                        <CardContent className="p-3 text-center">
+                          <p className="text-xs text-gray-600 mb-1">Vitamin D</p>
+                          <p className="font-semibold">{micronutrients.vitaminD}μg</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/60 backdrop-blur-sm">
+                        <CardContent className="p-3 text-center">
+                          <p className="text-xs text-gray-600 mb-1">Iron</p>
+                          <p className="font-semibold">{micronutrients.iron}mg</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/60 backdrop-blur-sm">
+                        <CardContent className="p-3 text-center">
+                          <p className="text-xs text-gray-600 mb-1">Calcium</p>
+                          <p className="font-semibold">{micronutrients.calcium}mg</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/60 backdrop-blur-sm">
+                        <CardContent className="p-3 text-center">
+                          <p className="text-xs text-gray-600 mb-1">Fiber</p>
+                          <p className="font-semibold">{micronutrients.fiber}g</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/60 backdrop-blur-sm">
+                        <CardContent className="p-3 text-center">
+                          <p className="text-xs text-gray-600 mb-1">Sodium</p>
+                          <p className="font-semibold">{micronutrients.sodium}mg</p>
+                        </CardContent>
+                      </Card>
+                    </div>
                   )}
                 </>
               )}
             </div>
           </div>
 
-          {/* Right Sidebar Ad */}
-          <aside className="hidden lg:block w-40 flex-shrink-0">
+          {/* Right Sidebar Ad - Hidden on mobile */}
+          <aside className="hidden xl:block w-40 flex-shrink-0">
             <div className="sticky top-24">
               <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
                 <div className="text-center text-gray-500">
@@ -321,6 +336,14 @@ const CalorieCalculator = () => {
               </div>
             </div>
           </aside>
+        </div>
+
+        {/* Bottom Ad - Hidden on mobile, show on desktop */}
+        <div className="hidden lg:block w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center mt-8">
+          <div className="text-center text-gray-500">
+            <div className="text-sm font-medium mb-1">Advertisement</div>
+            <div className="text-xs">728 x 90 Banner</div>
+          </div>
         </div>
       </div>
     </div>

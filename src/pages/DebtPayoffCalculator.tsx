@@ -111,7 +111,7 @@ const DebtPayoffCalculator = () => {
                 <TrendingDown className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
                   Debt Payoff Calculator
                 </h1>
                 <p className="text-sm text-gray-600">Plan your debt-free journey</p>
@@ -122,9 +122,9 @@ const DebtPayoffCalculator = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Left Sidebar Ad */}
-          <aside className="hidden lg:block w-40 flex-shrink-0">
+        <div className="flex flex-col xl:flex-row gap-8">
+          {/* Left Sidebar Ad - Hidden on mobile */}
+          <aside className="hidden xl:block w-40 flex-shrink-0">
             <div className="sticky top-24">
               <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
                 <div className="text-center text-gray-500">
@@ -135,9 +135,9 @@ const DebtPayoffCalculator = () => {
             </div>
           </aside>
 
-          <div className="flex-1 flex gap-8">
-            {/* Input Panel - 2/3 width */}
-            <div className="flex-[2] space-y-8">
+          <div className="flex-1 flex flex-col lg:flex-row gap-8">
+            {/* Input Panel */}
+            <div className="flex-1 space-y-8">
               <Card className="bg-white/60 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle>Debt Information</CardTitle>
@@ -145,7 +145,7 @@ const DebtPayoffCalculator = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {debts.map((debt, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div key={index} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1">Debt Name</label>
                         <Input
@@ -209,30 +209,32 @@ const DebtPayoffCalculator = () => {
                       Add Debt
                     </Button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Total Monthly Payment</label>
-                    <Input
-                      type="number"
-                      value={monthlyPayment}
-                      onChange={(e) => setMonthlyPayment(Number(e.target.value))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Payoff Strategy</label>
-                    <select
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      value={payoffStrategy}
-                      onChange={(e) => setPayoffStrategy(e.target.value)}
-                    >
-                      <option value="avalanche">Debt Avalanche (Highest Interest First)</option>
-                      <option value="snowball">Debt Snowball (Lowest Balance First)</option>
-                    </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Total Monthly Payment</label>
+                      <Input
+                        type="number"
+                        value={monthlyPayment}
+                        onChange={(e) => setMonthlyPayment(Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Payoff Strategy</label>
+                      <select
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={payoffStrategy}
+                        onChange={(e) => setPayoffStrategy(e.target.value)}
+                      >
+                        <option value="avalanche">Debt Avalanche (Highest Interest First)</option>
+                        <option value="snowball">Debt Snowball (Lowest Balance First)</option>
+                      </select>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Bottom Ad */}
-              <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+              {/* Bottom Ad - Show on mobile */}
+              <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center lg:hidden">
                 <div className="text-center text-gray-500">
                   <div className="text-sm font-medium mb-1">Advertisement</div>
                   <div className="text-xs">728 x 90 Banner</div>
@@ -240,8 +242,8 @@ const DebtPayoffCalculator = () => {
               </div>
             </div>
 
-            {/* Results and Scenarios Panel - 1/3 width */}
-            <div className="flex-1 space-y-6">
+            {/* Results and Scenarios Panel */}
+            <div className="w-full lg:w-80 space-y-6">
               {/* Results Panel */}
               <Card className="bg-white/60 backdrop-blur-sm">
                 <CardHeader>
@@ -302,8 +304,8 @@ const DebtPayoffCalculator = () => {
             </div>
           </div>
 
-          {/* Right Sidebar Ad */}
-          <aside className="hidden lg:block w-40 flex-shrink-0">
+          {/* Right Sidebar Ad - Hidden on mobile */}
+          <aside className="hidden xl:block w-40 flex-shrink-0">
             <div className="sticky top-24">
               <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
                 <div className="text-center text-gray-500">
@@ -313,6 +315,14 @@ const DebtPayoffCalculator = () => {
               </div>
             </div>
           </aside>
+        </div>
+
+        {/* Bottom Ad - Hidden on mobile, show on desktop */}
+        <div className="hidden lg:block w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center mt-8">
+          <div className="text-center text-gray-500">
+            <div className="text-sm font-medium mb-1">Advertisement</div>
+            <div className="text-xs">728 x 90 Banner</div>
+          </div>
         </div>
       </div>
     </div>
