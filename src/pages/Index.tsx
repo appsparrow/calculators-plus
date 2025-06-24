@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Calculator, Home, Car, CreditCard, BarChart3, Flame, GraduationCap, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,7 +44,7 @@ const calculators = [
     color: 'from-orange-400 to-sky-400',
     scenarios: ['Debt Avalanche', 'Debt Snowball', 'Mixed Strategy'],
     popular: false,
-    route: '#'
+    route: '/debt-payoff'
   },
   {
     id: 'calorie',
@@ -65,7 +64,7 @@ const calculators = [
     color: 'from-sky-400 to-pink-400',
     scenarios: ['Semester GPA', 'Cumulative', 'Target GPA', 'Course Planning'],
     popular: false,
-    route: '#'
+    route: '/gpa'
   }
 ];
 
@@ -76,16 +75,25 @@ const Index = () => {
         title: calculator.title,
         text: calculator.description,
         url: window.location.href + calculator.route
+      }).catch(() => {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href + calculator.route);
       });
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href + calculator.route);
-      // You could add a toast notification here
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-sky-50 to-pink-50">
+      {/* Meta tags for SEO */}
+      <head>
+        <title>Free Online Calculators for Finance, Health, and Education | Mortgage, Auto, Debt, Calorie & GPA Tools</title>
+        <meta name="description" content="Access the best free online calculators for mortgages, auto loans, credit card payoff, debt repayment, calorie needs, and GPA. Instantly calculate payments, savings, nutrition, and academic performance. Trusted, accurate, and easy to use." />
+        <meta name="keywords" content="free online calculators, mortgage calculator, auto loan calculator, credit card payoff calculator, debt payoff calculator, calorie calculator, GPA calculator, home loan, car loan, debt repayment, nutrition calculator, academic calculator, financial tools, health calculators, education calculators" />
+      </head>
+
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -127,15 +135,11 @@ const Index = () => {
           <main className="flex-1">
             {/* Hero Section */}
             <div className="text-center mb-12">
-              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-                Calculate with
-                <span className="bg-gradient-to-r from-orange-600 via-sky-600 to-pink-600 bg-clip-text text-transparent">
-                  {" "}Confidence
-                </span>
-              </h2>
+              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+                Free Online Calculators for Finance, Health, and Education
+              </h1>
               <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Smart calculators for life's most important financial decisions. 
-                Simple interface, accurate results, easy sharing.
+                Discover the most accurate and user-friendly online calculators for all your needs. Instantly estimate your <strong>mortgage payments</strong>, compare <strong>auto loans</strong>, plan your <strong>credit card payoff</strong>, create a <strong>debt repayment strategy</strong>, calculate your <strong>daily calorie needs</strong>, and track your <strong>GPA</strong>—all in one place. Our calculators are trusted by thousands for making smarter financial, health, and academic decisions. Start calculating and take control of your future today!
               </p>
               <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
                 <span className="flex items-center">✨ Intuitive Design</span>
@@ -187,17 +191,11 @@ const Index = () => {
                             ))}
                           </div>
                         </div>
-                        {calculator.route !== '#' ? (
-                          <Link to={calculator.route}>
-                            <Button className={`w-full bg-gradient-to-r ${calculator.color} hover:opacity-90 text-white border-0`}>
-                              Calculate Now
-                            </Button>
-                          </Link>
-                        ) : (
-                          <Button className={`w-full bg-gradient-to-r ${calculator.color} hover:opacity-90 text-white border-0`} disabled>
-                            Coming Soon
+                        <Link to={calculator.route}>
+                          <Button className={`w-full bg-gradient-to-r ${calculator.color} hover:opacity-90 text-white border-0`}>
+                            Calculate Now
                           </Button>
-                        )}
+                        </Link>
                       </div>
                     </CardContent>
                   </Card>
@@ -239,17 +237,11 @@ const Index = () => {
                             </Badge>
                           ))}
                         </div>
-                        {calculator.route !== '#' ? (
-                          <Link to={calculator.route}>
-                            <Button variant="outline" className="w-full hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50">
-                              Try Calculator
-                            </Button>
-                          </Link>
-                        ) : (
-                          <Button variant="outline" className="w-full hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50" disabled>
-                            Coming Soon
+                        <Link to={calculator.route}>
+                          <Button variant="outline" className="w-full hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50">
+                            Try Calculator
                           </Button>
-                        )}
+                        </Link>
                       </div>
                     </CardContent>
                   </Card>
