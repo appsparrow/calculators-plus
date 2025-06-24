@@ -4,6 +4,7 @@ import { Calculator, Home, Car, CreditCard, BarChart3, Flame, GraduationCap, Sha
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 const calculators = [
   {
@@ -13,7 +14,8 @@ const calculators = [
     icon: Home,
     color: 'from-orange-400 to-pink-400',
     scenarios: ['First-Time Buyer', 'Conventional', 'Jumbo Loan', 'VA Loan'],
-    popular: true
+    popular: true,
+    route: '/mortgage'
   },
   {
     id: 'auto-loan',
@@ -22,7 +24,8 @@ const calculators = [
     icon: Car,
     color: 'from-sky-400 to-blue-400',
     scenarios: ['New Car', 'Used Car', '0% APR', 'Lease vs Buy'],
-    popular: true
+    popular: true,
+    route: '/auto-loan'
   },
   {
     id: 'credit-card',
@@ -31,7 +34,8 @@ const calculators = [
     icon: CreditCard,
     color: 'from-pink-400 to-orange-400',
     scenarios: ['Extra Payment', 'Lump Sum', 'Bi-Weekly', 'Balance Transfer'],
-    popular: true
+    popular: true,
+    route: '/credit-card'
   },
   {
     id: 'debt-payoff',
@@ -40,7 +44,8 @@ const calculators = [
     icon: BarChart3,
     color: 'from-orange-400 to-sky-400',
     scenarios: ['Debt Avalanche', 'Debt Snowball', 'Mixed Strategy'],
-    popular: false
+    popular: false,
+    route: '#'
   },
   {
     id: 'calorie',
@@ -49,7 +54,8 @@ const calculators = [
     icon: Flame,
     color: 'from-pink-400 to-sky-400',
     scenarios: ['Weight Loss', 'Muscle Gain', 'Maintenance', 'Athletic'],
-    popular: false
+    popular: false,
+    route: '/calorie'
   },
   {
     id: 'gpa',
@@ -58,7 +64,8 @@ const calculators = [
     icon: GraduationCap,
     color: 'from-sky-400 to-pink-400',
     scenarios: ['Semester GPA', 'Cumulative', 'Target GPA', 'Course Planning'],
-    popular: false
+    popular: false,
+    route: '#'
   }
 ];
 
@@ -68,11 +75,11 @@ const Index = () => {
       navigator.share({
         title: calculator.title,
         text: calculator.description,
-        url: window.location.href + `#${calculator.id}`
+        url: window.location.href + calculator.route
       });
     } else {
       // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href + `#${calculator.id}`);
+      navigator.clipboard.writeText(window.location.href + calculator.route);
       // You could add a toast notification here
     }
   };
@@ -89,7 +96,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 via-sky-600 to-pink-600 bg-clip-text text-transparent">
-                  SmartCalc
+                  CalculatorsPlus
                 </h1>
                 <p className="text-sm text-gray-600">Most frequent scenarios made simple</p>
               </div>
@@ -180,9 +187,17 @@ const Index = () => {
                             ))}
                           </div>
                         </div>
-                        <Button className={`w-full bg-gradient-to-r ${calculator.color} hover:opacity-90 text-white border-0`}>
-                          Calculate Now
-                        </Button>
+                        {calculator.route !== '#' ? (
+                          <Link to={calculator.route}>
+                            <Button className={`w-full bg-gradient-to-r ${calculator.color} hover:opacity-90 text-white border-0`}>
+                              Calculate Now
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Button className={`w-full bg-gradient-to-r ${calculator.color} hover:opacity-90 text-white border-0`} disabled>
+                            Coming Soon
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -224,9 +239,17 @@ const Index = () => {
                             </Badge>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50">
-                          Try Calculator
-                        </Button>
+                        {calculator.route !== '#' ? (
+                          <Link to={calculator.route}>
+                            <Button variant="outline" className="w-full hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50">
+                              Try Calculator
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Button variant="outline" className="w-full hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50" disabled>
+                            Coming Soon
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -268,7 +291,7 @@ const Index = () => {
                 <Calculator className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-orange-600 via-sky-600 to-pink-600 bg-clip-text text-transparent">
-                SmartCalc
+                CalculatorsPlus
               </span>
             </div>
             <p className="text-gray-600 text-sm mb-4">
