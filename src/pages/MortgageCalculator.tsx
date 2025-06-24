@@ -29,6 +29,13 @@ const MortgageCalculator = () => {
   const [showAmortization, setShowAmortization] = useState(false);
   const [amortizationSchedule, setAmortizationSchedule] = useState<any[]>([]);
   
+  // Additional costs
+  const [monthlyPropertyTax, setMonthlyPropertyTax] = useState(0);
+  const [monthlyInsurance, setMonthlyInsurance] = useState(0);
+  const [hoaFees, setHoaFees] = useState(0);
+  const [pmiAmount, setPmiAmount] = useState(0);
+  const [otherCharges, setOtherCharges] = useState(0);
+  
   // Loan type toggles
   const [isFHA, setIsFHA] = useState(false);
   const [isVA, setIsVA] = useState(false);
@@ -70,10 +77,18 @@ const MortgageCalculator = () => {
     const totalInterest = totalPayment - principal;
 
     const annualPropertyTax = (homePrice * propertyTaxRate) / 100;
-    const monthlyPropertyTax = annualPropertyTax / 12;
+    const calculatedMonthlyPropertyTax = annualPropertyTax / 12;
 
     const annualHomeInsurance = (homePrice * homeInsuranceRate) / 100;
-    const monthlyHomeInsurance = annualHomeInsurance / 12;
+    const calculatedMonthlyHomeInsurance = annualHomeInsurance / 12;
+
+    // Set the calculated values if they haven't been manually set
+    if (monthlyPropertyTax === 0) {
+      setMonthlyPropertyTax(calculatedMonthlyPropertyTax);
+    }
+    if (monthlyInsurance === 0) {
+      setMonthlyInsurance(calculatedMonthlyHomeInsurance);
+    }
 
     setResults({
       monthlyPayment: monthlyPayment + monthlyPMI,
@@ -81,8 +96,8 @@ const MortgageCalculator = () => {
       totalPayment: totalPayment,
       principal: principal,
       interest: interestRate,
-      propertyTax: monthlyPropertyTax,
-      homeInsurance: monthlyHomeInsurance,
+      propertyTax: monthlyPropertyTax || calculatedMonthlyPropertyTax,
+      homeInsurance: monthlyInsurance || calculatedMonthlyHomeInsurance,
     });
 
     generateAmortizationSchedule(
@@ -147,9 +162,12 @@ const MortgageCalculator = () => {
 
   useEffect(() => {
     calculateMortgage();
-  }, [homePrice, downPayment, interestRate, loanTerm, propertyTaxRate, homeInsuranceRate, isFHA, isVA]);
+  }, [homePrice, downPayment, interestRate, loanTerm, propertyTaxRate, homeInsuranceRate, isFHA, isVA, monthlyPropertyTax, monthlyInsurance]);
 
   const isJumboLoan = (homePrice - downPayment) > 766550; // 2024 conforming loan limit
+
+  const totalMonthlyPayment = results ? 
+    results.monthlyPayment + results.propertyTax + results.homeInsurance + hoaFees + pmiAmount + otherCharges : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-sky-50 to-pink-50">
@@ -284,9 +302,9 @@ const MortgageCalculator = () => {
                   {results ? (
                     <div className="grid grid-cols-1 gap-4">
                       <div className="p-4 bg-gradient-to-r from-orange-50 to-pink-50 rounded-lg">
-                        <p className="text-sm font-medium text-gray-500">Monthly Payment (PITI)</p>
+                        <p className="text-sm font-medium text-gray-500">Total Monthly Payment</p>
                         <p className="text-2xl font-bold text-orange-600">
-                          ${(results.monthlyPayment + results.propertyTax + results.homeInsurance).toFixed(2)}
+                          ${totalMonthlyPayment.toFixed(2)}
                         </p>
                       </div>
                       <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg">
@@ -297,14 +315,63 @@ const MortgageCalculator = () => {
                         <p className="text-sm font-medium text-gray-500">Total Interest</p>
                         <p className="text-xl font-bold text-green-600">${results.totalInterest.toFixed(2)}</p>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      
+                      {/* Editable monthly costs */}
+                      <div className="space-y-3">
                         <div className="p-3 bg-gray-50 rounded-lg">
-                          <p className="text-xs font-medium text-gray-500">Property Tax</p>
-                          <p className="text-lg font-bold">${results.propertyTax.toFixed(2)}</p>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-medium text-gray-500">Monthly Property Tax</label>
+                          </div>
+                          <Input
+                            type="number"
+                            value={monthlyPropertyTax || results.propertyTax}
+                            onChange={(e) => setMonthlyPropertyTax(Number(e.target.value))}
+                            className="text-sm"
+                          />
                         </div>
                         <div className="p-3 bg-gray-50 rounded-lg">
-                          <p className="text-xs font-medium text-gray-500">Insurance</p>
-                          <p className="text-lg font-bold">${results.homeInsurance.toFixed(2)}</p>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-medium text-gray-500">Monthly Insurance</label>
+                          </div>
+                          <Input
+                            type="number"
+                            value={monthlyInsurance || results.homeInsurance}
+                            onChange={(e) => setMonthlyInsurance(Number(e.target.value))}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-medium text-gray-500">HOA Fees</label>
+                          </div>
+                          <Input
+                            type="number"
+                            value={hoaFees}
+                            onChange={(e) => setHoaFees(Number(e.target.value))}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-medium text-gray-500">PMI</label>
+                          </div>
+                          <Input
+                            type="number"
+                            value={pmiAmount}
+                            onChange={(e) => setPmiAmount(Number(e.target.value))}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-medium text-gray-500">Other Charges</label>
+                          </div>
+                          <Input
+                            type="number"
+                            value={otherCharges}
+                            onChange={(e) => setOtherCharges(Number(e.target.value))}
+                            className="text-sm"
+                          />
                         </div>
                       </div>
                     </div>
