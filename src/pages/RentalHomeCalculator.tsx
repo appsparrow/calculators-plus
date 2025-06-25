@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import CalculatorHeader from '@/components/CalculatorHeader';
+import AdSenseAd from '@/components/AdSenseAd';
 
 interface RentalResults {
   loanAmount: number;
@@ -106,40 +108,26 @@ const RentalHomeCalculator = () => {
         <meta name="keywords" content="rental home calculator, rental property calculator, real estate investment, cash flow calculator, property ROI, rental yield calculator" />
       </head>
 
-      <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                <ChevronLeft className="w-5 h-5" />
-              </Link>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-amber-400 to-amber-600 rounded-xl flex items-center justify-center">
-                <Building className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-600 bg-clip-text text-transparent">
-                  Rental Home Calculator
-                </h1>
-                <p className="text-sm text-gray-600">Analyze rental property cash flow</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <CalculatorHeader
+        title="Rental Home Calculator"
+        description="Analyze rental property cash flow"
+        icon={Building}
+        gradientFrom="amber-400"
+        gradientTo="amber-600"
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col xl:flex-row gap-8">
           {/* Left Sidebar Ad - Hidden on mobile */}
           <aside className="hidden xl:block w-40 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-xs font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">160 x 600</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="1234567890"
+                width={160}
+                height={600}
+                responsive={false}
+                adFormat="vertical"
+              />
             </div>
           </aside>
 
@@ -288,12 +276,14 @@ const RentalHomeCalculator = () => {
               </Card>
 
               {/* Bottom Ad - Show on mobile */}
-              <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center lg:hidden">
-                <div className="text-center text-gray-500">
-                  <div className="text-sm font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">728 x 90 Banner</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="3456789012"
+                width={320}
+                height={100}
+                responsive={true}
+                adFormat="horizontal"
+                className="w-full lg:hidden"
+              />
             </div>
 
             {/* Results and Scenarios Panel */}
@@ -389,22 +379,26 @@ const RentalHomeCalculator = () => {
           {/* Right Sidebar Ad - Hidden on mobile */}
           <aside className="hidden xl:block w-40 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-xs font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">160 x 600</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="5678901234"
+                width={160}
+                height={600}
+                responsive={false}
+                adFormat="vertical"
+              />
             </div>
           </aside>
         </div>
 
         {/* Bottom Ad - Hidden on mobile, show on desktop */}
-        <div className="hidden lg:block w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center mt-8">
-          <div className="text-center text-gray-500">
-            <div className="text-sm font-medium mb-1">Advertisement</div>
-            <div className="text-xs">728 x 90 Banner</div>
-          </div>
+        <div className="hidden lg:block mt-8">
+          <AdSenseAd
+            adSlot="7890123456"
+            width={728}
+            height={90}
+            responsive={true}
+            adFormat="horizontal"
+          />
         </div>
       </div>
     </div>

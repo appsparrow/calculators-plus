@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GraduationCap, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import CalculatorHeader from '@/components/CalculatorHeader';
+import AdSenseAd from '@/components/AdSenseAd';
 
 interface Course {
   name: string;
@@ -85,40 +87,26 @@ const GpaCalculator = () => {
         <meta name="keywords" content="GPA calculator, grade point average, calculate GPA, semester GPA, cumulative GPA, college GPA, high school GPA" />
       </head>
 
-      <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                <ChevronLeft className="w-5 h-5" />
-              </Link>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-600 bg-clip-text text-transparent">
-                  GPA Calculator
-                </h1>
-                <p className="text-sm text-gray-600">Calculate semester and cumulative GPA</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <CalculatorHeader
+        title="GPA Calculator"
+        description="Calculate semester and cumulative GPA"
+        icon={GraduationCap}
+        gradientFrom="indigo-400"
+        gradientTo="indigo-600"
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Left Sidebar Ad */}
           <aside className="hidden lg:block w-40 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-xs font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">160 x 600</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="1234567890"
+                width={160}
+                height={600}
+                responsive={false}
+                adFormat="vertical"
+              />
             </div>
           </aside>
 
@@ -221,23 +209,26 @@ const GpaCalculator = () => {
             </Card>
 
             {/* Bottom Ad */}
-            <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <div className="text-sm font-medium mb-1">Advertisement</div>
-                <div className="text-xs">728 x 90 Banner</div>
-              </div>
-            </div>
+            <AdSenseAd
+              adSlot="0987654321"
+              width={728}
+              height={90}
+              responsive={true}
+              adFormat="horizontal"
+              className="w-full"
+            />
           </div>
 
           {/* Right Sidebar Ad */}
           <aside className="hidden lg:block w-40 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-xs font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">160 x 600</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="5678901234"
+                width={160}
+                height={600}
+                responsive={false}
+                adFormat="vertical"
+              />
             </div>
           </aside>
         </div>

@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Home, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ShareButton from '@/components/ShareButton';
+import CalculatorHeader from '@/components/CalculatorHeader';
+import AdSenseAd from '@/components/AdSenseAd';
 
 interface MortgageResult {
   monthlyPayment: number;
@@ -178,40 +181,26 @@ const MortgageCalculator = () => {
         <meta name="keywords" content="mortgage calculator, home loan calculator, mortgage payment calculator, amortization schedule, FHA loan, VA loan, jumbo loan, property tax, home insurance, first-time homebuyer" />
       </head>
 
-      <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                <ChevronLeft className="w-5 h-5" />
-              </Link>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-400 rounded-xl flex items-center justify-center">
-                <Home className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
-                  Mortgage Calculator
-                </h1>
-                <p className="text-sm text-gray-600">Calculate monthly payments and amortization</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <CalculatorHeader
+        title="Mortgage Calculator"
+        description="Calculate monthly payments and amortization"
+        icon={Home}
+        gradientFrom="orange-400"
+        gradientTo="pink-400"
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Left Sidebar Ad */}
           <aside className="hidden lg:block w-40 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-xs font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">160 x 600</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="1234567890"
+                width={160}
+                height={600}
+                responsive={false}
+                adFormat="vertical"
+              />
             </div>
           </aside>
 
@@ -457,23 +446,26 @@ const MortgageCalculator = () => {
             )}
 
             {/* Bottom Ad */}
-            <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <div className="text-sm font-medium mb-1">Advertisement</div>
-                <div className="text-xs">728 x 90 Banner</div>
-              </div>
-            </div>
+            <AdSenseAd
+              adSlot="0987654321"
+              width={728}
+              height={90}
+              responsive={true}
+              adFormat="horizontal"
+              className="w-full"
+            />
           </div>
 
           {/* Right Sidebar Ad */}
           <aside className="hidden lg:block w-40 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-xs font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">160 x 600</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="5678901234"
+                width={160}
+                height={600}
+                responsive={false}
+                adFormat="vertical"
+              />
             </div>
           </aside>
         </div>

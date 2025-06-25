@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Flame, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import CalculatorHeader from '@/components/CalculatorHeader';
+import AdSenseAd from '@/components/AdSenseAd';
 
 interface CalorieResult {
   bmr: number;
@@ -28,18 +30,36 @@ const CalorieCalculator = () => {
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [height, setHeight] = useState(175);
   const [weight, setWeight] = useState(75);
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg');
   const [activityLevel, setActivityLevel] = useState(1.55);
   const [goal, setGoal] = useState<'lose' | 'maintain' | 'gain'>('maintain');
   const [results, setResults] = useState<CalorieResult | null>(null);
   const [micronutrients, setMicronutrients] = useState<Micronutrients | null>(null);
 
+  // Convert weight to kg for calculations
+  const getWeightInKg = () => {
+    return weightUnit === 'lbs' ? weight * 0.453592 : weight;
+  };
+
+  // Handle unit switch with conversion
+  const toggleWeightUnit = () => {
+    const newUnit = weightUnit === 'kg' ? 'lbs' : 'kg';
+    const convertedWeight = weightUnit === 'kg' 
+      ? Math.round(weight * 2.20462 * 10) / 10  // kg to lbs
+      : Math.round(weight * 0.453592 * 10) / 10; // lbs to kg
+    
+    setWeight(convertedWeight);
+    setWeightUnit(newUnit);
+  };
+
   const calculateCalories = () => {
     let bmr: number;
+    const weightInKg = getWeightInKg();
 
     if (gender === 'male') {
-      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      bmr = 10 * weightInKg + 6.25 * height - 5 * age + 5;
     } else {
-      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      bmr = 10 * weightInKg + 6.25 * height - 5 * age - 161;
     }
 
     let calories = bmr * activityLevel;
@@ -50,8 +70,8 @@ const CalorieCalculator = () => {
       calories += 500;
     }
 
-    const protein = weight * 1.6;
-    const fat = weight * 1;
+    const protein = weightInKg * 1.6;
+    const fat = weightInKg * 1;
     const carbs = (calories - protein * 4 - fat * 9) / 4;
 
     setResults({
@@ -81,7 +101,7 @@ const CalorieCalculator = () => {
 
   useEffect(() => {
     calculateCalories();
-  }, [age, gender, height, weight, activityLevel, goal]);
+  }, [age, gender, height, weight, weightUnit, activityLevel, goal]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-sky-50 to-pink-50">
@@ -91,40 +111,26 @@ const CalorieCalculator = () => {
         <meta name="keywords" content="calorie calculator, macro calculator, BMR calculator, TDEE calculator, daily calorie needs, weight loss calculator, weight gain calculator, protein intake, carb intake, fat intake" />
       </head>
 
-      <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                <ChevronLeft className="w-5 h-5" />
-              </Link>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
-                <Flame className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-600 bg-clip-text text-transparent">
-                  Calorie Calculator
-                </h1>
-                <p className="text-sm text-gray-600">Calculate daily calorie needs and macros</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <CalculatorHeader
+        title="Calorie Calculator"
+        description="Calculate daily calorie needs and macros"
+        icon={Flame}
+        gradientFrom="orange-400"
+        gradientTo="orange-600"
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Sidebar Ad - Hidden on mobile */}
           <aside className="hidden xl:block w-40 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-xs font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">160 x 600</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="1234567890"
+                width={160}
+                height={600}
+                responsive={false}
+                adFormat="vertical"
+              />
             </div>
           </aside>
 
@@ -178,9 +184,19 @@ const CalorieCalculator = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Weight (kg)</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-sm font-medium">Weight ({weightUnit})</label>
+                        <button
+                          type="button"
+                          onClick={toggleWeightUnit}
+                          className="text-xs text-blue-600 hover:text-blue-800 font-medium bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors"
+                        >
+                          Switch to {weightUnit === 'kg' ? 'lbs' : 'kg'}
+                        </button>
+                      </div>
                       <Input
                         type="number"
+                        step={weightUnit === 'lbs' ? '0.1' : '0.1'}
                         value={weight}
                         onChange={(e) => setWeight(Number(e.target.value))}
                       />
@@ -230,12 +246,14 @@ const CalorieCalculator = () => {
               </Card>
 
               {/* Bottom Ad - Show on mobile */}
-              <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center lg:hidden">
-                <div className="text-center text-gray-500">
-                  <div className="text-sm font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">728 x 90 Banner</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="3456789012"
+                width={320}
+                height={100}
+                responsive={true}
+                adFormat="horizontal"
+                className="w-full lg:hidden"
+              />
             </div>
 
             {/* Results Panel */}
@@ -328,22 +346,26 @@ const CalorieCalculator = () => {
           {/* Right Sidebar Ad - Hidden on mobile */}
           <aside className="hidden xl:block w-40 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-xs font-medium mb-1">Advertisement</div>
-                  <div className="text-xs">160 x 600</div>
-                </div>
-              </div>
+              <AdSenseAd
+                adSlot="5678901234"
+                width={160}
+                height={600}
+                responsive={false}
+                adFormat="vertical"
+              />
             </div>
           </aside>
         </div>
 
         {/* Bottom Ad - Hidden on mobile, show on desktop */}
-        <div className="hidden lg:block w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center mt-8">
-          <div className="text-center text-gray-500">
-            <div className="text-sm font-medium mb-1">Advertisement</div>
-            <div className="text-xs">728 x 90 Banner</div>
-          </div>
+        <div className="hidden lg:block mt-8">
+          <AdSenseAd
+            adSlot="7890123456"
+            width={728}
+            height={90}
+            responsive={true}
+            adFormat="horizontal"
+          />
         </div>
       </div>
     </div>
